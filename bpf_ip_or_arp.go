@@ -17,7 +17,8 @@ const (
 
 // https://pkg.go.dev/golang.org/x/net/bpf#example-NewVM
 func main() {
-	vm, err := bpf.NewVM([]bpf.Instruction{
+
+	instruction := []bpf.Instruction{
 		// EthernetヘッダからTypeをロード
 		bpf.LoadAbsolute{
 			Off:  etOff,
@@ -33,7 +34,14 @@ func main() {
 		bpf.RetConstant{Val: 0},
 		// ARPパケットであれば1500byte読み込む
 		bpf.RetConstant{Val: 1500},
-	})
+	}
+
+	for i := 0; i < len(instruction); i++ {
+		fmt.Printf("%v\n", instruction[i])
+	}
+
+	vm, err := bpf.NewVM(instruction)
+
 	if err != nil {
 		panic(fmt.Sprintf("failed to load BPF program: %v", err))
 	}

@@ -26,3 +26,6 @@ go.work.sum
 .idea
 bpf_ip_or_arp
 ip_or_arp
+bpf_seccomp_filter
+sample_filter
+*.txt
