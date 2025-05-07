@@ -53,6 +53,8 @@ func (sys *Syscall) convertAction(actionString string) seccomp.Action {
 	switch actionString {
 	case "SCMP_ACT_ALLOW":
 		action = seccomp.ActionAllow
+	case "SCMP_ACT_ERRNO":
+		action = seccomp.ActionErrno
 	}
 	return action
 }
@@ -157,28 +159,36 @@ func _() {
 		NoNewPrivs: true,
 		Flag:       seccomp.FilterFlagTSync,
 		Policy: seccomp.Policy{
-			DefaultAction: seccomp.ActionKillProcess,
+			DefaultAction: seccomp.ActionErrno,
 			Syscalls: []seccomp.SyscallGroup{
 				{
-					Action: seccomp.ActionAllow,
+					Action: seccomp.ActionErrno,
 					Names: []string{
 						// "personality",
-						"write",
-						"mkdir",
-						"getcwd",
+						"clone3",
 					},
-					NamesWithCondtions: []seccomp.NameWithConditions{
-						{
-							Name: "personality",
-							Conditions: []seccomp.Condition{
-								{
-									Argument:  0,
-									Operation: seccomp.Equal,
-									Value:     8,
-								},
-							},
-						},
-					},
+					//NamesWithCondtions: []seccomp.NameWithConditions{
+					//	//{
+					//	//	Name: "personality",
+					//	//	Conditions: []seccomp.Condition{
+					//	//		{
+					//	//			Argument:  0,
+					//	//			Operation: seccomp.Equal,
+					//	//			Value:     8,
+					//	//		},
+					//	//	},
+					//	//},
+					//	{
+					//		Name: "clone",
+					//		Conditions: []seccomp.Condition{
+					//			{
+					//				Argument:  0,
+					//				Operation: seccomp.LessOrEqual,
+					//				Value:     2114060288,
+					//			},
+					//		},
+					//	},
+					//},
 				},
 			},
 		},
@@ -192,7 +202,7 @@ func _() {
 	for i := 0; i < len(inst); i++ {
 		//fmt.Printf("%v\n", inst[i])
 		raw, _ := inst[i].Assemble()
-		fmt.Printf("code: %02x jt: %02x, jf: %02x, k: %08x\n", raw.Op, raw.Jt, raw.Jf, raw.K)
+		fmt.Printf("code: %02x, jt: %02x, jf: %02x, k: %08x\n", raw.Op, raw.Jt, raw.Jf, raw.K)
 	}
 	//fmt.Printf("before load filter : %d\n", syscall.Getpid())
 	// Load it. This will set no_new_privs before loading.
