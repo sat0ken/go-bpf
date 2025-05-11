@@ -152,7 +152,7 @@ func main() {
 	jsontToSeccompFilter("default_x86_64.json")
 }
 
-func _() {
+func nomain() {
 
 	// Create a filter.
 	filter := seccomp.Filter{
@@ -162,22 +162,24 @@ func _() {
 			DefaultAction: seccomp.ActionErrno,
 			Syscalls: []seccomp.SyscallGroup{
 				{
-					Action: seccomp.ActionErrno,
+					Action: seccomp.ActionAllow,
 					Names: []string{
-						// "personality",
-						"clone3",
+						"getcwd",
+						"mkdir",
 					},
-					//NamesWithCondtions: []seccomp.NameWithConditions{
-					//	//{
-					//	//	Name: "personality",
-					//	//	Conditions: []seccomp.Condition{
-					//	//		{
-					//	//			Argument:  0,
-					//	//			Operation: seccomp.Equal,
-					//	//			Value:     8,
-					//	//		},
-					//	//	},
-					//	//},
+					NamesWithCondtions: []seccomp.NameWithConditions{
+						{
+							Name: "personality",
+							Conditions: []seccomp.Condition{
+								{
+									Argument: 0,
+									// []Operation{Equal, NotEqual, GreaterThan, LessThan, GreaterOrEqual, LessOrEqual, BitsSet, BitsNotSet}
+									Operation: seccomp.BitsSet,
+									Value:     8,
+								},
+							},
+						},
+					},
 					//	{
 					//		Name: "clone",
 					//		Conditions: []seccomp.Condition{
@@ -206,10 +208,10 @@ func _() {
 	}
 	//fmt.Printf("before load filter : %d\n", syscall.Getpid())
 	// Load it. This will set no_new_privs before loading.
-	if err := seccomp.LoadFilter(filter); err != nil {
-		log.Fatal("failed to load filter: ", err)
-	}
-	fmt.Println("Load seccomp filter is OK")
+	//if err := seccomp.LoadFilter(filter); err != nil {
+	//	log.Fatal("failed to load filter: ", err)
+	//}
+	//fmt.Println("Load seccomp filter is OK")
 
 	//fmt.Printf("after load filter : %d\n", syscall.Getpid())
 }
